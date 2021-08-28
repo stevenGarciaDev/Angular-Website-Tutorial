@@ -1,0 +1,54 @@
+We will be retrieving data from a remote server.
+
+For now use mock data.
+
+list heroes with *ngFor
+
+
+<h2>My Heroes</h2>
+<ul class="heroes">
+    <li *ngFor="let hero of heroes">
+        <span class="badge">{{hero.id}}</span> {{hero.name}}
+    </li>
+</ul>
+
+*ngFor is Angular's repeater directive.
+
+It repeats the host element for each element 
+in a list.
+
+-
+You can define private styles inline in the 
+@Component.styles array or as a stylesheet file 
+identified in the @Component.styleUrls array 
+
+Styles are scoped to that specific environment.
+
+-
+
+Add a click event binding.
+
+    <li *ngFor="let hero of heroes" (click)="onSelect(hero)">
+
+
+    an example of Angular's event binding syntax.
+
+    () tell Angular to listen for the <li> element's click event 
+
+    Angular will execute the onSelect(hero) expression 
+    when that event occurs,
+
+<div *ngIf="selectedHero">
+    <h2>{{selectedHero.name | uppercase}} Details</h2>
+    <div><span>id: </span>{{selectedHero.id}}</div>
+    <div>
+      <label for="hero-name">Hero name: </label>
+      <input id="hero-name" [(ngModel)]="selectedHero.name" placeholder="name">
+    </div>
+</div>
+
+--
+
+class binding 
+
+    [class.selected]="hero === selectedHero"
