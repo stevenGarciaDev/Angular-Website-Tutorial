@@ -1,0 +1,47 @@
+App we are building is a staffing agency to manage a stable of heroes.
+
+Application has many features you would expect in any data-driven application.
+
+By the end of this tutorial you will be able to do the following:
+
+    Use built-in Angular directives to show and hide elements and display lists of hero data.
+    Create Angular components to display hero details and show an array of heroes.
+    Use one-way data binding for read-only data.
+    Add editable fields to update a model with two-way data binding.
+    Bind component methods to user events, like keystrokes and clicks.
+    Enable users to select a hero from a master list and edit that hero in the details view.
+    Format data with pipes.
+    Create a shared service to assemble the heroes.
+    Use routing to navigate among different views and their components.
+
+-
+Create a project.
+
+Create the initial project using the Angular CLI.
+
+$ ng new angular-tour-of-heroes
+
+$ cd angular-tour-of-heroes
+$ ng serve --open
+
+    the ng serve command builds the app, starts the development server,
+    watches the source files, and rebuilds the application as you make 
+    changes to those files.
+
+    the --open flag opens a browser to http://localhost:4200/
+
+The page you see is the application shell. The shell is controlled 
+by an Angular component named AppComponent.
+
+app.component.ts— the component class code, written in TypeScript.
+app.component.html— the component template, written in HTML.
+app.component.css— the component's private CSS styles.
+
+
+    title = 'Tour of Heroes';
+
+    then in template 
+
+    <h1>{{title}}</h1>
+    <!-- interpolation binding syntax -->
+
