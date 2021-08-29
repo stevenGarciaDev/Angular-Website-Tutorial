@@ -1,0 +1,281 @@
+Add the AppRoutingModule
+
+In Angular, the best practice is to 
+load and configure the router in a separate,
+top-level module that is dedicated
+to routing and imported by the root AppModule.
+
+$ ng generate module app-routing --flat --module=app
+
+    --flat puts the file in src/app 
+    instead of its own folder
+
+    --module=app
+    tells the CLI to register it in the 
+    imports array of the AppModule
+
+app-routing.module.ts
+
+so the default generated code is 
+
+    import { NgModule } from '@angular/core';
+    import { CommonModule } from '@angular/common';
+
+
+
+    @NgModule({
+        declarations: [],
+        imports: [
+            CommonModule
+        ]
+    })
+    export class AppRoutingModule { }
+
+-
+Modify it to be 
+
+    import { NgModule } from '@angular/core';
+    import { CommonModule } from '@angular/common';
+    import { Router, RouterModule, Routes } from '@angular/router';
+    import { HeroesComponent } from './heroes/heroes.component';
+
+    const routes: Routes = [
+        { path: 'heroes', component: HeroesComponent }
+    ];
+
+    @NgModule({
+        imports: [RouterModule.forRoot(routes)],
+        exports: [RouterModule]
+    })
+    export class AppRoutingModule { }
+
+imports RouterModule and Routes 
+so the application can have routing functionality
+
+Note that CommonModule references and declarations 
+array are unneccesarry.
+
+Routes 
+
+    the part of the file where you configure your routes.
+
+    Routes tell the Router which view to display 
+    when a user clicks on a link or pastes a URL 
+    into the browser address bar.
+
+    app-routing.module.ts
+    uses a routes array 
+
+    a typical Angular Route has two properties,
+
+    path:
+        a string that matches the URL in the 
+        browser address bar
+
+    component: 
+        the component that the router 
+        should create when navigating to this route
+
+the @NgModule metadata 
+initializes the router and starts listening 
+for browser location changes
+
+the following line adds the RouterModule
+to the AppRoutingModule imports array 
+and configures it with the routes in one step 
+by calling RouterModule.forRoot()
+
+    imports: [RouterModule.forRoot(routes)],
+
+the method is called .forRoot()
+because you configure the router at the application's root level
+So it supplies 
+the service prividers and directives needed for routing
+and performs the initial navigation based on the current 
+browser URL.
+
+next, AppRoutingModule exports RouterModule
+so it will be available throughout the application
+
+    exports: [RouterModule]
+
+
+add RouterOutlet
+
+    app.component.html
+
+    so 
+
+    <router-outlet>
+
+        tells the router where to display 
+        routed views
+
+    note if you manually created 
+    the app-routing.module.ts 
+    without using the CLI,
+    you would need to import 
+    AppRoutingModule into app.module.ts 
+    and add it to the imports array 
+    of the NgModule
+
+Add a navigation link (routerLink)
+
+app.component.html
+
+    <h1>{{title}}</h1>
+    <nav>
+        <a routerLink="/heroes">Heroes</a>
+    </nav>
+    <router-outlet></router-outlet>
+    <app-messages></app-messages>
+
+
+    routerLink is the selector for the 
+    RouterLink directive 
+    that turns user clicks 
+    into router navigation.
+    It's another of the public directives 
+    in the RouterModule.
+
+Add a dashboard view
+
+    $ ng g c dashboard
+
+    @Component({
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
+})
+export class DashboardComponent implements OnInit {
+  heroes: Hero[] = [];
+
+  constructor(private heroService: HeroService) { }
+
+  ngOnInit(): void {
+
+  }
+
+  getHeroes(): void {
+    this.heroService.getHeroes()
+      .subscribe(heroes => this.heroes = heroes.slice(1, 5));
+  }
+
+}
+
+--
+add a default route
+
+    const routes: Routes = [
+        { path: 'heroes', component: HeroesComponent },
+        { path: 'dashboard', component: DashboardComponent },
+        { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+    ];
+
+    the last route redirects a URL that 
+    fully matches the empty path to the route 
+
+add a hero detail route
+
+    const routes: Routes = [
+        { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+        { path: 'heroes', component: HeroesComponent },
+        { path: 'dashboard', component: DashboardComponent },
+        { path: 'details/:id', component: HeroDetailComponent },
+    ];
+
+    so we add a parameterized route to the routes array,
+
+    the colon in the path indicates that :id 
+    is a placeholder for a specific hero id
+
+DashboardComponent hero links
+
+    <h2>Top Heroes</h2>
+    <div class="heroes-menu">
+        <a *ngFor="let hero of heroes"
+            routerLink="/detail/{{hero.id}}"
+        >
+            {{hero.name}}
+        </a>
+    </div>
+
+
+    so above we are using Angular interpolation binding
+
+
+Routable HeroDetailComponent
+
+    import { ActivatedRoute } from '@angular/router';
+    import { Location } from '@angular/common';
+
+
+    constructor(
+        private route: ActivatedRoute,
+        private heroService: HeroService,
+        private location: Location
+    ) { }
+
+
+    so ActivatedRoute holds information 
+    about the route to this instance 
+    of the HeroDetailComponent
+
+    the component is interested in the 
+    route's parameters extracted from the url.
+
+    the 'id' parameter is the id 
+    of the hero to display 
+
+    the location is an Angular service 
+    for interacting with the browser.
+
+    // You'll use it later to navigate back 
+    // to the view that navigated there.
+
+Extract the id route parameter
+
+    in the ngOnInit() lifecycle hook 
+
+    call getHeroe()
+
+    ngOnInit(): void {
+        const id = Number(this.route.snapshot.paramMap.get('id'));
+        this.heroService.getHero(id)
+            .subscribe(hero => this.selectedHero = hero);
+    }
+
+
+    route.snapshot is 
+    a static image of the route information shortly 
+    after the component was created
+
+    the paramMap is a dictionary of route parameter 
+    values extracted from the URL.
+
+    Route parameters are always strings,
+
+    the JavaScript Number() function 
+    converts the string to a number,
+    which is what the hero id should be
+
+Add HeroService.getHero()
+
+    getHero(id: number): Observable<Hero> {
+        const hero = HEROES.find(h => h.id === id);
+        this.messageService.add(`HeroService: fetched hero id=${id}`);
+        return of(hero!);
+    }
+
+find the way back
+
+    hero-detail.component.html
+
+        <button (click)="goBack()">go back</button>
+
+    hero-detail.component.ts
+
+        getBack(): void {
+            this.location.back();
+        }
+

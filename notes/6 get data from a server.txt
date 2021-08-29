@@ -1,0 +1,22 @@
+add data persistence features with the 
+help of Angular's HttpClient
+
+Enable HTTP Services
+
+    HttpClient is Angular's mechanism for 
+    communicating with a remote server over HTTP
+
+    making HttpClient available everywhere 
+    in the application in two steps 
+
+    in app.module.ts
+
+        import { HttpClientModule } from '@angular/common/http';
+
+        add HttpClientModule to the imports array
+
+        @NgModule({
+            imports: [
+                HttpClientModule,
+            ]
+        })
