@@ -1,0 +1,196 @@
+Services are useful as they enable us 
+to enhance the functionality and 
+use dependency injection for easier unit testing.
+
+Why services?
+
+    Component's shouldn't fetch or save 
+    data directly.
+
+    They should focus on presenting data 
+    and delegate data access to a service.
+
+    Rely on Angular's dependency injection 
+    to inject it to the 
+    HeroesComponent constructor.
+
+    Services are a great way to share information 
+    among classes that don't know each other.
+
+
+$ ng generate service hero 
+
+// or could do ng g s hero
+
+--
+
+Note that service class 
+has the decorator 
+
+    @Injectable()
+
+This marks the class as one that participates 
+in the dependency injection system.
+
+The @Injectable() decorator 
+accepts a metadata object for the service,
+the same way the @Component() decorator did for 
+your component classes
+
+-
+
+in hero.service.ts
+
+--
+
+Providing the HeroService
+
+    You must make the HeroService available 
+    to the dependency injection system 
+    before Angular can inject it 
+    into the HeroesComponent 
+    by registering a provider.
+
+    A provider is something that can create 
+    or deliver a service; in this case,
+    it instantiates the HeroService class 
+    to provide the service.
+
+    Register it with the injector, which is the object 
+    responsible for choosing and injecting the 
+    provider where the application requires it.
+
+    By default, the Angular CLI command 
+    ng g s 
+
+    registers a provider with the root injector 
+    for your service by 
+    providing the meta data 
+
+
+    @Injectable({
+        providedIn: 'root'
+    })
+
+
+    -
+
+When you provide the service at the root level,
+Angular creates a single, shared instance of 
+HeroService and injects it into any class that asks 
+for it.
+
+Registering the provider in the @Injectable 
+metadata also allows Angular to optimize an 
+application by removing the service if it turns out 
+not to be used after all.
+
+-
+
+Update HeroesComponent
+
+    @Component({
+        selector: 'app-heroes',
+        templateUrl: './heroes.component.html',
+        styleUrls: ['./heroes.component.css']
+    })
+    export class HeroesComponent implements OnInit {
+        heroes: Hero[] = [];
+        selectedHero?: Hero;
+
+        constructor(private heroService: HeroService) { }
+
+        ngOnInit(): void {
+            this.getHeroes();
+        }
+
+        getHeroes(): void {
+            this.heroes = this.heroService.getHeroes();
+        }
+
+For working with asynchronous operations,
+the service must wait for the server to respond.
+and we don't want the browser to block 
+while the sesrvice waits.
+
+we have it return an Observable 
+beecause it will eventually use the 
+Angular HttpClient.get method 
+to fetch the heroes 
+and HttpClient.get() returns an Observable.
+
+
+Observable HeroService
+
+    Observable is one of the key classes 
+    in the RxJS library.
+
+    Angular's HttpClient returns an 
+    RxJS Observable.
+
+    We'll simulate getting data from the server 
+    with the RxJS of() function.
+
+
+    in hero.service.ts 
+
+    import { Observable, of } from 'rxjs';
+
+
+    getHeroes(): Observable<Hero[]> {
+        const heroes = of(HEROES);
+        return heroes;
+    }
+
+-
+so of(HEROES) returns an Observable<Hero[]>
+that emits a single value. 
+    // the array of mock heroes 
+
+
+Subscribe in HeroesComponent
+
+    getHeroes(): void {
+        this.heroService.getHeroes()
+        .subscribe(heroes => this.heroes = heroes);
+    }
+
+    Observable.subscribe()
+
+    is the critical different
+
+    so this implementation 
+    will wait for the 
+    Observable to emit the array of values.
+
+    This could happen now or several minutes 
+    from now.
+
+    The subscribe() method passes 
+    the emitted array to the callback,
+
+    This asynchronous approach will work 
+    when the HeroService requests heroes 
+    from the server.
+
+Show messages
+
+    $ ng g c messages 
+
+    
+
+    ...
+
+    this is a typical 
+    "service-in-service" scenario
+    where you inject the MessageService
+    into the HeroService
+    which is injected into the HeroesComponent
+
+
+    getHeroes(): Observable<Hero[]> {
+        const heroes = of(HEROES);
+        this.messageService.add("HeroService: fetched heroes");
+        return heroes;
+    }
+
